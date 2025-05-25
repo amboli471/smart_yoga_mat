@@ -4,7 +4,6 @@ import 'package:animate_do/animate_do.dart';
 
 import '../services/audio_service.dart';
 import '../theme/app_theme.dart';
-import 'audio_migration_screen.dart';
 
 class MusicScreen extends StatefulWidget {
   const MusicScreen({Key? key}) : super(key: key);
@@ -36,18 +35,6 @@ class _MusicScreenState extends State<MusicScreen> {
       appBar: AppBar(
         title: const Text('Sounds & Music'),
         actions: [
-          // Migration tool button (for development/admin)
-          IconButton(
-            icon: const Icon(Icons.upload_file),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AudioMigrationScreen(),
-                ),
-              );
-            },
-            tooltip: 'Migration Tool',
-          ),
           // Refresh button
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -249,7 +236,7 @@ class _MusicScreenState extends State<MusicScreen> {
                   Text(
                     _searchQuery.isNotEmpty
                         ? 'Try searching with different keywords'
-                        : 'Use the migration tool to upload audio files',
+                        : 'Add some audio files to your Firebase Hosting',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -506,7 +493,7 @@ class _MusicScreenState extends State<MusicScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            // Progress bar
+            // Progress bar - FIXED VERSION
             StreamBuilder<Duration>(
               stream: audioService.positionStream,
               builder: (context, positionSnapshot) {
@@ -526,9 +513,7 @@ class _MusicScreenState extends State<MusicScreen> {
                             ),
                             Expanded(
                               child: Slider(
-                                value: duration.inMilliseconds > 0
-                                    ? position.inMilliseconds / duration.inMilliseconds
-                                    : 0.0,
+                                value: _getSliderValue(position, duration),
                                 onChanged: (value) {
                                   final newPosition = Duration(
                                     milliseconds: (value * duration.inMilliseconds).round(),
@@ -546,7 +531,7 @@ class _MusicScreenState extends State<MusicScreen> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        // Volume control
+                        // Volume control - FIXED VERSION
                         Row(
                           children: [
                             const Icon(
@@ -556,7 +541,7 @@ class _MusicScreenState extends State<MusicScreen> {
                             ),
                             Expanded(
                               child: Slider(
-                                value: audioService.volume,
+                                value: _clampValue(audioService.volume, 0.0, 1.0),
                                 onChanged: (value) {
                                   audioService.setVolume(value);
                                 },
@@ -586,6 +571,24 @@ class _MusicScreenState extends State<MusicScreen> {
         ),
       ),
     );
+  }
+
+  // Helper method to safely calculate slider value
+  double _getSliderValue(Duration position, Duration duration) {
+    if (duration.inMilliseconds <= 0) {
+      return 0.0;
+    }
+
+    final value = position.inMilliseconds / duration.inMilliseconds;
+    return _clampValue(value, 0.0, 1.0);
+  }
+
+  // Helper method to clamp values between min and max
+  double _clampValue(double value, double min, double max) {
+    if (value.isNaN || value.isInfinite) {
+      return min;
+    }
+    return value.clamp(min, max);
   }
 
   Color _getCategoryColor(String category) {

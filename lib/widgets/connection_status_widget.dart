@@ -66,7 +66,9 @@ class ConnectionStatusWidget extends StatelessWidget {
                 SizedBox(height: 4),
                 Text(
                   'Battery: ${matService.matBatteryLevel}%',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
                 ),
               ],
             ),
@@ -129,13 +131,16 @@ class ConnectionStatusWidget extends StatelessWidget {
                   'Connecting...',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                   ),
+
                 ),
                 SizedBox(height: 4),
                 Text(
                   'Please wait while we connect to your mat',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
                 ),
               ],
             ),
@@ -185,7 +190,9 @@ class ConnectionStatusWidget extends StatelessWidget {
                 SizedBox(height: 4),
                 Text(
                   'Connect to your yoga mat to get started',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
                 ),
               ],
             ),

@@ -1,1 +1,30 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"revoltronxprototype","appId":"1:261944785303:android:f03901443bfdebacdeecd2","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"revoltronxprototype","configurations":{"android":"1:261944785303:android:f03901443bfdebacdeecd2","ios":"1:261944785303:ios:5c86fe59b86e1f04deecd2"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "revoltronxprototype",
+          "appId": "1:261944785303:android:f03901443bfdebacdeecd2",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "revoltronxprototype",
+          "configurations": {
+            "android": "1:261944785303:android:f03901443bfdebacdeecd2",
+            "ios": "1:261944785303:ios:5c86fe59b86e1f04deecd2"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "firebase_hosting/public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class Sound {
   final String id;
@@ -10,8 +8,7 @@ class Sound {
   final String url;
   final Duration? duration;
   final List<String>? tags;
-  final DateTime? createdAt;
-  final int playCount;
+  int playCount;
 
   Sound({
     required this.id,
@@ -20,47 +17,12 @@ class Sound {
     required this.url,
     this.duration,
     this.tags,
-    this.createdAt,
     this.playCount = 0,
   });
-
-  factory Sound.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return Sound(
-      id: doc.id,
-      name: data['name'] ?? '',
-      category: data['category'] ?? '',
-      url: data['url'] ?? '',
-      duration: data['duration'] != null
-          ? Duration(seconds: data['duration'])
-          : null,
-      tags: data['tags'] != null
-          ? List<String>.from(data['tags'])
-          : null,
-      createdAt: data['createdAt'] != null
-          ? (data['createdAt'] as Timestamp).toDate()
-          : null,
-      playCount: data['playCount'] ?? 0,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'category': category,
-      'url': url,
-      'duration': duration?.inSeconds,
-      'tags': tags,
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
-      'playCount': playCount,
-    };
-  }
 }
 
 class ModernAudioService extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   // State variables
   Sound? _currentSound;
@@ -88,35 +50,109 @@ class ModernAudioService extends ChangeNotifier {
 
   ModernAudioService() {
     _initializeAudioPlayer();
-    _loadSoundsFromFirestore();
+    _loadSounds();
   }
 
-  Future<void> _loadSoundsFromFirestore() async {
+  void _loadSounds() {
     try {
       _setLoading(true);
       _setError(null);
 
-      final snapshot = await _firestore
-          .collection('audio')
-          .where('isActive', isEqualTo: true)
-          .orderBy('name')
-          .get();
+      // Define your audio files here - ALL meditation sounds now use "Meditation" category
+      _sounds = [
+        Sound(
+          id: 'ocean_waves',
+          name: 'Ocean Waves',
+          category: 'Nature',
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//ocean.mp3',
+          tags: ['ocean', 'waves', 'water', 'relaxing'],
+        ),
+        Sound(
+          id: 'rain_forest',
+          name: 'Rain',
+          category: 'Nature',
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//rain.mp3',
+          tags: ['rain', 'forest', 'nature', 'peaceful'],
+        ),
+        Sound(
+          id: 'meditation_bell',
+          name: 'Meditation Bells',
+          category: 'Meditation', // Capitalized
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//meditation_bell.wav',
+          tags: ['bell', 'meditation', 'zen', 'mindfulness'],
+        ),
+        Sound(
+          id: 'thunder_storm',
+          name: 'Thunder Storm',
+          category: 'Nature',
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//thunder.mp3',
+          tags: ['thunder', 'storm', 'rain', 'dramatic'],
+        ),
+        Sound(
+          id: 'campfire',
+          name: 'Campfire',
+          category: 'Nature',
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//campfire.mp3',
+          tags: ['fire', 'crackling', 'camping', 'cozy'],
+        ),
+        Sound(
+          id: 'wind_chimes',
+          name: 'Wind',
+          category: 'Meditation', // Capitalized
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//wind.mp3',
+          tags: ['chimes', 'wind', 'peaceful', 'gentle'],
+        ),
+        Sound(
+          id: 'bird_songs',
+          name: 'Bird chirps',
+          category: 'Nature',
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//birds.wav',
+          tags: ['birds', 'singing', 'morning', 'nature'],
+        ),
+        Sound(
+          id: 'flowing_stream',
+          name: 'Flowing Stream',
+          category: 'Nature',
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//stream.wav',
+          tags: ['stream', 'water', 'flowing', 'peaceful'],
+        ),
+        Sound(
+          id: 'forest',
+          name: 'Forest Sound',
+          category: 'Nature',
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//forest.mp3',
+          tags: ['forest', 'calm', 'peaceful'],
+        ),
+        Sound(
+          id: 'om_chanting',
+          name: 'Om Chants',
+          category: 'Meditation', // Changed from lowercase 'meditation' to 'Meditation'
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//om_chanting.mp3',
+          tags: ['focus', 'chant', 'calm', 'peaceful'],
+        ),
+        Sound(
+          id: 'singing_bowls',
+          name: 'Singing Bowls',
+          category: 'Meditation', // Changed from lowercase 'meditation' to 'Meditation'
+          url: 'https://uvcwuwlolhbsshlpditb.supabase.co/storage/v1/object/public/audio//singing_bowls.wav',
+          tags: ['focus', 'meditation', 'calm', 'peaceful'],
+        ),
+        // Add more sounds as needed
+      ];
 
-      _sounds = snapshot.docs.map((doc) => Sound.fromFirestore(doc)).toList();
-
-      print('Loaded ${_sounds.length} sounds from Firestore');
+      print('Loaded ${_sounds.length} sounds');
       notifyListeners();
 
     } catch (e) {
       print('Error loading sounds: $e');
-      _setError('Failed to load sounds from database');
+      _setError('Failed to load sounds');
     } finally {
       _setLoading(false);
     }
   }
 
   Future<void> refreshSounds() async {
-    await _loadSoundsFromFirestore();
+    _loadSounds();
   }
 
   void _initializeAudioPlayer() {
@@ -156,13 +192,6 @@ class ModernAudioService extends ChangeNotifier {
           break;
       }
     });
-
-    // Listen to duration changes to update sound duration in database
-    _audioPlayer.durationStream.listen((duration) {
-      if (_currentSound != null && duration != null) {
-        _updateSoundDuration(_currentSound!, duration);
-      }
-    });
   }
 
   Future<void> playSound(Sound sound) async {
@@ -191,16 +220,17 @@ class ModernAudioService extends ChangeNotifier {
       }
 
       // Set the audio source and play
+      print('Playing sound from URL: ${sound.url}');
       await _audioPlayer.setUrl(sound.url);
       await _audioPlayer.play();
 
-      // Update play count
-      await _incrementPlayCount(sound);
+      // Increment play count locally
+      sound.playCount++;
 
     } catch (e) {
       _setBuffering(false);
       _setPlaying(false);
-      _setError('Failed to play ${sound.name}');
+      _setError('Failed to play ${sound.name}. Check if the audio file exists.');
       _setCurrentSound(null);
       print('Error playing sound: $e');
     }
@@ -286,32 +316,6 @@ class ModernAudioService extends ChangeNotifier {
     } catch (e) {
       print('Error setting loop mode: $e');
       _setError('Failed to set loop mode');
-    }
-  }
-
-  Future<void> _incrementPlayCount(Sound sound) async {
-    try {
-      await _firestore.collection('audio').doc(sound.id).update({
-        'playCount': FieldValue.increment(1),
-        'lastPlayedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error updating play count: $e');
-      // Don't show this error to user as it's not critical
-    }
-  }
-
-  Future<void> _updateSoundDuration(Sound sound, Duration duration) async {
-    try {
-      // Only update if we don't have duration stored yet
-      if (sound.duration == null) {
-        await _firestore.collection('audio').doc(sound.id).update({
-          'duration': duration.inSeconds,
-        });
-      }
-    } catch (e) {
-      print('Error updating sound duration: $e');
-      // Don't show this error to user as it's not critical
     }
   }
 

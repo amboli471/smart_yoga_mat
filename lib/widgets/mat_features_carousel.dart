@@ -152,7 +152,9 @@ class _MatFeaturesCarouselState extends State<MatFeaturesCarousel> {
                   SizedBox(height: 6), // Reduced from 8 to 6
                   Text(
                     feature.description,
-                    style: Theme.of(context).textTheme.bodySmall, // Changed from bodyMedium to bodySmall
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),

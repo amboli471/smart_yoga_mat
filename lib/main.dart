@@ -15,7 +15,6 @@ import 'services/analytics_service.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'theme/app_theme.dart';
-import 'utils/data_migration.dart';
 import 'firebase_options.dart'; // Make sure this exists
 import 'package:firebase_auth/firebase_auth.dart';
 
